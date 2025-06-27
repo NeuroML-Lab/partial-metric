@@ -51,7 +51,10 @@ class SoftMatch(Metric):
         y_centered = y.T - self.my_
 
         # compute cost matrix
-        self.cost = 1 - pairwise_cosine_similarity(x_centered, y_centered)
+        # self.cost = 1 - pairwise_cosine_similarity(x_centered, y_centered)
+        from torchmetrics.functional import pairwise_euclidean_distance
+
+        self.cost = pairwise_euclidean_distance(x_centered, y_centered)
 
         # initialize uniform marginals
         a = torch.ones(x.shape[1], device=x.device) / x.shape[1]
