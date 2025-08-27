@@ -30,7 +30,7 @@ def compute_corner(curvatures: torch.Tensor) -> torch.Tensor:
 
 def compute_residuals_and_transport(
     matrix1: torch.Tensor, matrix2: torch.Tensor, num_points: int
-) -> Tuple[torch.float64, torch.float64, torch.Tensor]:
+) -> Tuple[float, float, torch.Tensor]:
     """
     compute the residuals (in our case, untransported mass) and their
     associated transport costs (1 - score) or dissimilarity. generally

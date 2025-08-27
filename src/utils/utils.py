@@ -5,6 +5,14 @@ from tqdm import tqdm
 from src.metrics.alignment.soft_match import SoftMatch
 
 
+def precision(true_positive: float, false_positive: float) -> float:
+    """
+    compute a precision score given the number of true and false
+    positive measures
+    """
+    return true_positive / (true_positive + false_positive)
+
+
 def pairwise_correlation(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """
     compute the pairwise correlation between x and y

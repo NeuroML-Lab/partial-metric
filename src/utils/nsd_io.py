@@ -37,10 +37,10 @@ def gather_responses(
     for stimulus_id in data.keys():
         all_subject_responses = data[stimulus_id]
         if (
-            all_subject_responses[subj1] is not None
-            and all_subject_responses[subj2] is not None
+            all_subject_responses[subject1] is not None
+            and all_subject_responses[subject2] is not None
         ):
-            subject1_responses.append(all_subject_responses[subj1])
-            subject2_responses.append(all_subject_responses[subj2])
+            subject1_responses.append(all_subject_responses[subject1])
+            subject2_responses.append(all_subject_responses[subject2])
 
     return np.array(subject1_responses), np.array(subject2_responses)
