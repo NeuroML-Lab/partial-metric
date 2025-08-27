@@ -1,10 +1,12 @@
 from tqdm import tqdm
-from typing import Optional
+from typing import Optional, List
 from collections import OrderedDict
 
 import torch
 import torch.nn as nn
 from torchvision import transforms, datasets
+
+from lucent.modelzoo.util import get_model_layers
 
 
 def compute_accuracy(
@@ -104,7 +106,7 @@ def init_model_instance(model_type: str, num_classes: Optional[int] = 10):
                 )
 
         else:
-            raise notimplementederror
+            raise NotImplementedError
 
     else:
         raise ValueError(f"incorrect model type: {model_type}")
@@ -136,6 +138,15 @@ def load_weights(
     model.load_state_dict(clean_weights)
 
     return model
+
+
+def get_conv_layer_names(model) -> List[str]:
+    """
+    get names of all convolutional layers in a model.
+    names here are returned in accordance with lucent expects,
+    ie: `.` replaced with `_`.
+    """
+    return [l for l in get_model_layers(model) if "conv" in l or "features" in l]
 
 
 def get_layer_names(model):
