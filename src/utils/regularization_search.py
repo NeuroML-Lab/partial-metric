@@ -30,12 +30,13 @@ def compute_corner(curvatures: torch.Tensor) -> torch.Tensor:
 
 def compute_residuals_and_transport(
     matrix1: torch.Tensor, matrix2: torch.Tensor, num_points: int
-) -> Tuple[float, float, torch.Tensor]:
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
-    compute the residuals (in our case, untransported mass) and their
-    associated transport costs (1 - score) or dissimilarity. generally
-    speaking, more mass reg parameters would be better since we are closer
-    to approximating a continuous curve, giving better curvature approximations.
+    compute the residuals (in our case, untransported mass) and
+    their associated transport costs (1 - score) or dissimilarity.
+    generally speaking, more mass reg parameters would be better since we
+    are closer to approximating a continuous curve, giving better
+    curvature approximations.
     """
     transport_costs, residuals = [], []
     mreg_values = torch.linspace(0, 0.999, num_points)
@@ -44,16 +45,17 @@ def compute_residuals_and_transport(
         # instantiate the metric
         metric = UnbalancedSoftMatch(mass_reg=m)
 
-        scores = metric.fit_kfold_score(x=matrix1, y=matrix2)
-        transport_cost = torch.mean(torch.tensor(scores))
-        transport_costs.append(transport_cost)
+        scores = metric.fit_kfold_score(torch.tensor(matrix1), torch.tensor(matrix2))
+        transport_cost = torch.mean(torch.Tensor(scores))
+        transport_costs.append(1 - transport_cost)
 
         transport_plan = metric.transform
-        # compute the total transported mass
+        # compute the total transported mass.
         transported_mass = transport_plan.sum().item()
 
         # compute the residual (unmatched mass)
-        # note that we have unit normalized the sum of inputs
+        # note that we have unit normalized the sum of input distributions
+        # in the actual implementation
         residual = 1 - transported_mass
         residuals.append(residual)
 

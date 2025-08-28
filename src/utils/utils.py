@@ -1,6 +1,9 @@
 import torch
 import numpy as np
 from tqdm import tqdm
+from typing import List
+
+from lucent.modelzoo.util import get_model_layers
 
 from src.metrics.alignment.soft_match import SoftMatch
 
@@ -11,6 +14,13 @@ def precision(true_positive: float, false_positive: float) -> float:
     positive measures
     """
     return true_positive / (true_positive + false_positive)
+
+
+def get_conv_layer_names(model) -> List[str]:
+    """
+    get names of all convolutional layers in a model
+    """
+    return [l for l in get_model_layers(model) if "conv" in l or "features" in l]
 
 
 def pairwise_correlation(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
