@@ -2,7 +2,6 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from typing import List
-
 from lucent.modelzoo.util import get_model_layers
 
 from src.metrics.alignment.soft_match import SoftMatch
@@ -16,11 +15,28 @@ def precision(true_positive: float, false_positive: float) -> float:
     return true_positive / (true_positive + false_positive)
 
 
-def get_conv_layer_names(model) -> List[str]:
+def random_rotation_matrix(dim: int) -> torch.Tensor:
     """
-    get names of all convolutional layers in a model
+    generate a random rotation matrix of given dimension
+
+    Args:
+        dim (int): the dimension of the rotation matrix
+    Returns:
+        q (torch.Tensor): a random rotation matrix of shape (dim, dim)
     """
-    return [l for l in get_model_layers(model) if "conv" in l or "features" in l]
+    # start with a random matrix
+    random_matrix = torch.randn(dim, dim)
+
+    # perform QR decomposition to get an orthogonal matrix (Q)
+    q, _ = torch.linalg.qr(random_matrix)
+
+    # ensure that we get a rotation matrix (ie: determinant = 1)
+    # if the determinant is -1, negate the last column of Q to make the
+    # determinant 1
+    if torch.det(q) < 0:
+        q[:, -1] *= -1
+
+    return q
 
 
 def pairwise_correlation(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:

@@ -83,7 +83,7 @@ def init_model_instance(model_type: str, num_classes: Optional[int] = 10):
                 "pytorch/vision:v0.10.0", "resnet18", pretrained=False
             )
         else:
-            raise notimplementederror
+            raise NotImplementedError
 
     elif model_type == "resnet50":
         if num_classes == 1000:
@@ -166,6 +166,7 @@ def get_layer_names(model):
 
 def get_activations(model, dloader, layer_name="linear", device_id="0"):
     activations = []
+    model = model.to(f"cuda:{device_id}")
 
     def hook(module, input, output):
         if output.ndim == 4:

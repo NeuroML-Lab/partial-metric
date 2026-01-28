@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# ignore binary files
+*.pkl
+
 # ignore log directories
 *logs/
 
@@ -12,6 +15,8 @@ cifar10-augmented/
 MacaqueITBench/
 Images/
 augmented_images/
+data/
+meis-synth/
 
 # cache files
 .ipynb_checkpoints/

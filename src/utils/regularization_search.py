@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from tqdm import tqdm
-from typing import Tuple
+from typing import Tuple, Optional
 
 from src.metrics.alignment.partial_wasserstein import UnbalancedSoftMatch
 
@@ -29,7 +29,10 @@ def compute_corner(curvatures: torch.Tensor) -> torch.Tensor:
 
 
 def compute_residuals_and_transport(
-    matrix1: torch.Tensor, matrix2: torch.Tensor, num_points: int
+    matrix1: torch.Tensor,
+    matrix2: torch.Tensor,
+    num_points: int,
+    cost_type: Optional[str] = "cosine",
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     compute the residuals (in our case, untransported mass) and
@@ -43,11 +46,18 @@ def compute_residuals_and_transport(
 
     for m in tqdm(mreg_values):
         # instantiate the metric
-        metric = UnbalancedSoftMatch(mass_reg=m)
+        metric = UnbalancedSoftMatch(mass_reg=m, cost_type=cost_type)
 
         scores = metric.fit_kfold_score(torch.tensor(matrix1), torch.tensor(matrix2))
         transport_cost = torch.mean(torch.Tensor(scores))
-        transport_costs.append(1 - transport_cost)
+        if cost_type == "cosine":
+            transport_costs.append(1 - transport_cost)
+        elif cost_type == "euclidean":
+            transport_costs.append(transport_cost)
+        else:
+            raise ValueError(
+                f"invalid cost type: {cost_type}; choose one of [`cosine`, `euclidean`]"
+            )
 
         transport_plan = metric.transform
         # compute the total transported mass.

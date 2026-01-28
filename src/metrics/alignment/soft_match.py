@@ -5,7 +5,10 @@ from typing import Optional, List, Union
 from src.metrics.base import Metric
 
 import torch
-from torchmetrics.functional import pairwise_cosine_similarity
+from torchmetrics.functional import (
+    pairwise_cosine_similarity,
+    pairwise_euclidean_distance,
+)
 
 
 class SoftMatch(Metric):
@@ -14,8 +17,9 @@ class SoftMatch(Metric):
     of neural activations
     """
 
-    def __init__(self, k_folds: Optional[int] = 5):
+    def __init__(self, cost_type: Optional[str] = "cosine", k_folds: Optional[int] = 5):
         super().__init__(k_folds=k_folds)
+        self.cost_type = cost_type
 
     @staticmethod
     def _clean_matrices(x: Union[torch.Tensor, np.ndarray]) -> torch.Tensor:
@@ -51,7 +55,14 @@ class SoftMatch(Metric):
         y_centered = y.T - self.my_
 
         # compute cost matrix
-        self.cost = 1 - pairwise_cosine_similarity(x_centered, y_centered)
+        if self.cost_type == "cosine":
+            self.cost = 1 - pairwise_cosine_similarity(x_centered, y_centered)
+        elif self.cost_type == "euclidean":
+            self.cost = pairwise_euclidean_distance(x_centered, y_centered) ** 2
+        else:
+            raise ValueError(
+                f"invalid cost type: {self.cost_type}; choose one of [`cosine`, `euclidean`]"
+            )
 
         # initialize uniform marginals
         a = torch.ones(x.shape[1], device=x.device) / x.shape[1]
@@ -83,15 +94,30 @@ class SoftMatch(Metric):
         if not use_kfold:
             x = x.T - self.mx_
             y = y.T - self.my_
-            similarity_score = 1 - torch.nansum(self.transform * self.cost).item()
+            if self.cost_type == "cosine":
+                similarity_score = 1 - torch.nansum(self.transform * self.cost).item()
+            elif self.cost_type == "euclidean":
+                similarity_score = torch.nansum(self.transform * self.cost).item()
+            else:
+                raise ValueError(
+                    f"invalid cost type: {self.cost_type}; choose one of [`cosine`, `euclidean`]"
+                )
         else:
             mx = torch.nanmean(x.T, dim=1)[:, None]
             my = torch.nanmean(y.T, dim=1)[:, None]
             x_centered = x.T - mx
             y_centered = y.T - my
             # compute cost of transport in test split
-            cost = 1 - pairwise_cosine_similarity(x_centered, y_centered)
-            similarity_score = 1 - torch.nansum(self.transform * cost).item()
+            if self.cost_type == "cosine":
+                cost = 1 - pairwise_cosine_similarity(x_centered, y_centered)
+                similarity_score = 1 - torch.nansum(self.transform * cost).item()
+            elif self.cost_type == "euclidean":
+                cost = pairwise_euclidean_distance(x_centered, y_centered) ** 2
+                similarity_score = torch.nansum(self.transform * cost).item()
+            else:
+                raise ValueError(
+                    f"invalid cost type: {self.cost_type}; choose one of [`cosine`, `euclidean`]"
+                )
 
         # assert that we have a birkhoff
         norm_factor_row = 1 / self.transform.shape[0]

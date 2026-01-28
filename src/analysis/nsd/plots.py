@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # personal plotting pet peeves
 plt.rcParams["text.usetex"] = True
 
-from src.experiments.nsd.noise_ceiling import (
+from src.analysis.nsd.noise_ceiling import (
     align_voxel_responses_unbalanced,
     compute_noise_ceilings,
 )

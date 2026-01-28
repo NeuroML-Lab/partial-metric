@@ -68,9 +68,12 @@ def optimal_regularization(responses1: np.ndarray, responses2: np.ndarray) -> fl
     compute the optimal mass regularization for a pair of subject responses
     """
     transport_distance, residuals, mreg = compute_residuals_and_transport(
-        matrix1=subject1_stacked,
-        matrix2=subject2_stacked,
-        num_points=max(subject1_stacked.shape[1], subject2_stacked.shape[1]),
+        matrix1=responses1,
+        matrix2=responses2,
+        num_points=max(responses1.shape[1], responses2.shape[1]),
+        # matrix1=subject1_stacked,
+        # matrix2=subject2_stacked,
+        # num_points=max(subject1_stacked.shape[1], subject2_stacked.shape[1]),
     )
     # estimate the point of inflection
     ddy = np.diff(np.diff(transport_distance))
@@ -138,6 +141,30 @@ def compute_coupling_precision(
     return transport_precision
 
 
+def threshold_voxel_noise_ceilings(
+    base_path: str,
+    brain_region: str,
+    subj1: int,
+    subj2: int,
+    responses1: torch.Tensor,
+    responses2: torch.Tensor,
+    noise_ceiling_threshold: float,
+):
+    """
+    threshold voxels based on noise ceiling heuristics
+    """
+
+    # load noise ceilings for subjects
+    nc_subject1 = np.load(f"{base_path}{brain_region}_data/nc_0{subj1}.npy")
+    nc_subject2 = np.load(f"{base_path}{brain_region}_data/nc_0{subj2}.npy")
+
+    # find voxels below noise threshold
+    below_nc_subject1 = nc_subject1[nc_subject1 < noise_ceiling_threshold]
+    below_nc_subject2 = nc_subject2[nc_subject2 < noise_ceiling_threshold]
+
+    print(below_nc_subject1, below_nc_subject2)
+
+
 if __name__ == "__main__":
     base_path = "/mnt/cogsci/NSD_preprocessed_datasets_shreya/"
     subject1, subject2 = 1, 2
@@ -145,6 +172,8 @@ if __name__ == "__main__":
 
     # construct all possible brain region combination pairs
     region_pairs = list(combinations(brain_regions, 2))
+
+    region_pairs = region_pairs[11:]
 
     for brain_region1, brain_region2 in tqdm(region_pairs, total=len(region_pairs)):
         print(f"using responses from {brain_region1} and {brain_region2}")
