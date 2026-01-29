@@ -1,0 +1,67 @@
+#+LATEX_HEADER: \usepackage{bm}
+* Partial Soft-Matching Distance for Neural Representational Comparison with Partial Unit Correspondence
+
+This repository contains all code for the following paper:
+
+/"Partial Soft-Matching Distance for Neural Representational Comparison with Partial Unit Correspondence"/. (ICLR, 2026)
+
+Chaitanya Kapoor, Alex H. Williams, Meenakshi Khosla
+
+arXiv link: /*(Coming Soon!)*/
+
+The structure of the repository is as follows:
+
+
+* Installation
+  Clone the repository
+  #+begin_src shell
+  git clone https://github.com/NeuroML-Lab/partial-metric/
+  cd partial-metric
+  #+end_src
+
+  Create a new conda environment using the ~environment.yml~ file:
+  #+begin_src shell
+  conda env create --name partial-metric --file=environment.yml
+  #+end_src
+
+  Next, install the code as an editable package in the conda environment created above.
+  #+begin_src shell
+  pip install -e .
+  #+end_src
+
+* Usage
+** Metrics
+    Implementations for (partial) soft-matching are available in [[file:./src/metrics/alignment]]. If one wishes to align a pair of tuning curves $\{X, Y\}\in\mathbb{R}^{M\times\{N_x,N_Y\}}$ using the partial soft-matching metric, we can simply do this as follows:
+    #+begin_src python
+    import torch
+    from src.metrics.alignment.partial_wasserstein import UnbalancedSoftMatch
+
+    # intialize a random matrix pair
+    x, y = torch.randn(100, 20), torch.randn(100, 30) # (N_stimulus, units)
+
+    # initialize metric object
+    partial_sm = UnbalancedSoftMatch(cost_type="cosine", mass_reg=1e-2)
+    
+    # fit transform on the entire stimulus set and compute a correlation score
+    print(f"score: {partial_sm.fit_score(x=x, y=y)}")
+    #+end_src
+    One can alse use the soft-matching metric in an identical manner.
+
+** Experiments
+    We provide experiment jupyter notebooks in [[file:./experiments/]]. One can also use a variety of standalone python scripts for the different experiments we demonstrate in our manuscript.
+*** Synthetic Data
+    Code for generating synthetic, approximately one-to-one matched response matrices can be found in [[file:./src/utils/synthesize.py]]. Jupyter notebooks for model selection and spurious neuron detection is available in [[file:./experiments/synthetic-model-selection.ipynb]] and [[file:./experiments/synthetic-spurious-neurons.ipynb]] respectively. Note that these notebooks also contain code on the L-curve heuristic for computing an /"optimal"/ mass regularization parameter in the partial soft-matching metric.
+*** Natural Scenes Dataset
+    We make use of the popular Natural Scened Dataset (NSD; Allen /et al./, 2022) to conduct voxel-matching experiments on brain data. The jupyter notebook for testing different matching strategies (brute-force, partial and correlation-based ordering) is available in [[file:./experiments/nsd-sm-partial-matching.ipynb]]. For the L-curve heuristic and noise-ceiling threshold analysis (*Sec. 4.3* in the manuscript), one can refer to [[file:./src/analysis/nsd/l_curve_analysis.py]] and [[file:./src/analysis/nsd/noise_threshold_analysis.py]] respectively. 
+*** Convolutional Neural Networks
+    Jupyter notebooks testing matching strategies between a pair of ResNet18 models (trained on ImageNet1k; initialized with different random seeds) and testing the evidence of a privileged representational basis is available in [[file:./experiments/matching-strategies-resnet18.ipynb]] and [[file:./experiments/privileged-axes-mreg.ipynb]] respectively.
+    
+*** Maximally Exciting Images
+    Scripts to generate maximally exciting images (MEIs) for an arbitrary Pytorch model can be found in [[file:./src/analysis/dnn/generate_meis.py]]. Note that currently the code only supports the synthesis of MEIs obtained from maximizing the activation of the center pixel for all layers in a given model. Here is an example use case of the script to generate MEIs for a ~ResNet18~ model trained on ImageNet:
+    #+begin_src shell
+    python src/analysis/dnn/generate_meis.py --model_type resnet18 --num_classes 1000 --base_path /path/to/model/checkpoint/ --seed 1 --image_size 224 --savedir /path/to/savedir --device_id 0
+    #+end_src
+    One can get more information about each of the flags by running ~python src/analysis/dnn/generate_meis.py -h~. Code for computing matched MEI pairs is available in [[file:./experiments/mei-dnn.ipynb]]. 
+
+* Citation
+  /*(Coming Soon!)*/
