@@ -31,7 +31,7 @@ The structure of the repository is as follows:
 
 * Usage
 ** Metrics
-    Implementations for (partial) soft-matching are available in [[file:./src/metrics/alignment]]. If one wishes to align a pair of tuning curves $\{X, Y\}\in\mathbb{R}^{M\times\{N_x,N_Y\}}$ using the partial soft-matching metric, we can simply do this as follows:
+    Implementations for (partial) soft-matching are available in [[file:./src/metrics/alignment]]. If one wishes to align a pair of tuning curves using the partial soft-matching metric, we can simply do this as follows:
     #+begin_src python
     import torch
     from src.metrics.alignment.partial_wasserstein import UnbalancedSoftMatch
