@@ -7,7 +7,7 @@ This repository contains all code for the following paper:
 
 Chaitanya Kapoor, Alex H. Williams, Meenakshi Khosla
 
-arXiv link: /*(Coming Soon!)*/
+arXiv link: https://arxiv.org/pdf/2602.19331
 
 The structure of the repository is as follows:
 
@@ -64,4 +64,11 @@ The structure of the repository is as follows:
     One can get more information about each of the flags by running ~python src/analysis/dnn/generate_meis.py -h~. Code for computing matched MEI pairs is available in [[file:./experiments/mei-dnn.ipynb]]. 
 
 * Citation
-  /*(Coming Soon!)*/
+    #+begin_src bibtex
+    @article{kapoor2026partial,
+  title={Partial Soft-Matching Distance for Neural Representational Comparison with Partial Unit Correspondence},
+  author={Kapoor, Chaitanya and Williams, Alex H and Khosla, Meenakshi},
+  journal={arXiv preprint arXiv:2602.19331},
+  year={2026}
+}
+    #+end_src
